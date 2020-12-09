@@ -6,7 +6,11 @@ import (
 	"os"
 )
 
-func Read3() string {
+type cfgAnalysis interface {
+	Read(string) string
+}
+
+func Read3(filepath string) (fileContext string) {
 	f, err := os.Open("file/test")
 	if err != nil {
 		fmt.Println("read file fail", err)

@@ -17,17 +17,20 @@ type RHS interface {
 	getAllToken() []string
 }
 
+//TokenInfo describe property of token
 type TokenInfo struct {
 	token       string
 	nonTerminal bool
 }
 
+//LHSInfo describe arg of LHS
 type LHSInfo struct {
 	ruleNum     uint16
 	rulesNum    uint16
 	nonTerminal TokenInfo
 }
 
+//RHSInfo describe context of RHS
 type RHSInfo struct {
 	tokens []TokenInfo
 }
