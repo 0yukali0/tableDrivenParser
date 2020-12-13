@@ -1,4 +1,4 @@
-package cfgreader
+package reader
 
 //LHS basic operation
 type LHS interface {
@@ -14,20 +14,22 @@ type LHS interface {
 //RHS information operation
 type RHS interface {
 	getLHSRuleNum() uint16
+	getRHSRuleNum() uint16
 	getAllToken() []string
 }
 
 //TokenInfo describe property of token
 type TokenInfo struct {
 	token       string
-	nonTerminal bool
+	Terminal    bool
+	nonTerminal string
 }
 
 //LHSInfo describe arg of LHS
 type LHSInfo struct {
-	ruleNum     uint16
-	rulesNum    uint16
-	nonTerminal TokenInfo
+	LHSOrder uint16
+	rulesNum uint16
+	Rules    []RHSInfo
 }
 
 //RHSInfo describe context of RHS
