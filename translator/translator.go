@@ -17,9 +17,9 @@ func NewTranslator() {
 
 }
 
-func GetApplyCon(leftToken string, rightToken string) (ruleNum uint16, terminals string) {
+func (t *Translator) GetApplyCon(leftToken string, rightToken string) (ruleNum uint16, terminals string) {
 	return 0, ""
 }
-func IsTerminal(token string) bool {
+func (t *Translator) IsTerminal(token string) bool {
 	return true
 }
