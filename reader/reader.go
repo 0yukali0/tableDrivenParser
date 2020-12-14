@@ -21,11 +21,27 @@ type FileReader struct {
 	Tokens       []RHSInfo
 }
 
+func NewFileReader() *FileReader {
+	fileReader := &FileReader{
+		context:      "",
+		err:          nil,
+		Nonterminals: make(map[string]LHSInfo),
+		Terminals:    make(map[string]RHSInfo),
+		Tokens:       make([]RHSInfo, 3),
+	}
+	return fileReader
+}
+
 func (r *FileReader) Read(filepath string) {
 	f, err := os.Open(filepath)
 	if err != nil {
 		r.err = errors.New("File path is invalid")
 	}
+	defer func() {
+		if err = f.Close(); err != nil {
+			panic(err)
+		}
+	}()
 	defer f.Close()
 
 	fd, err := ioutil.ReadAll(f)

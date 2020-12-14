@@ -1,7 +1,7 @@
 package translator
 
 import (
-	"reader"
+	cfg "reader"
 )
 
 type CFGTable interface {
@@ -10,16 +10,24 @@ type CFGTable interface {
 }
 
 type Translator struct {
-	reader reader.FileReader
+	reader *cfg.FileReader
 }
 
-func NewTranslator() {
-
+func NewTranslator() *Translator {
+	translator := &Translator{
+		reader: nil,
+	}
+	return translator
 }
 
-func (t *Translator) GetApplyCon(leftToken string, rightToken string) (ruleNum uint16, terminals string) {
-	return 0, ""
+func (t *Translator) SetReader(r *cfg.FileReader) {
+	t.reader = r
 }
+
 func (t *Translator) IsTerminal(token string) bool {
 	return true
+}
+
+func (t *Translator) GetApplyCon(leftToken string, rightToken string) (uint16, string) {
+	return 0, ""
 }
