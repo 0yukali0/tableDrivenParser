@@ -37,11 +37,6 @@ func (r *FileReader) Read(filepath string) {
 	if err != nil {
 		r.err = errors.New("File path is invalid")
 	}
-	defer func() {
-		if err = f.Close(); err != nil {
-			panic(err)
-		}
-	}()
 	defer f.Close()
 
 	fd, err := ioutil.ReadAll(f)
