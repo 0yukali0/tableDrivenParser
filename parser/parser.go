@@ -1,14 +1,18 @@
 package parser
 
 import (
+	"fmt"
 	"strings"
 	trans "translator"
 )
 
 var (
-	symbals   []string
-	userinput []string
-	accepted  bool
+	symbals    []string
+	userinput  []string
+	applyRules []string
+	ruleNums   []string
+	accepted   bool
+	ruleNum    int
 )
 
 type Parser struct {
@@ -38,16 +42,36 @@ func (p *Parser) LLParser() {
 	accepted = false
 
 	for !accepted {
+		//POP()
 		n := len(startSymbal) - 1
-		top = symbals[n]
-		if p.translator.IsTerminal(symbals[n]) {
-			for i, inP := range userinput {
-				ismatch := strings.Compare(symbals[n], inP)
+		top := symbals[n]
 
+		if p.translator.IsTerminal(top) {
+
+			inP := userinput[0]
+			ismatch := strings.Compare(top, inP)
+			if ismatch == 0 {
+				userinput = userinput[1:]
 			}
 
+			if strings.Compare(top, "$") == 0 {
+				accepted = true
+			}
+
+			//call POP()
+			symbals = symbals[:n]
+			//end pop
 		} else {
-			p := translator.GetApplyCon(a)
+			ruleNum, llTable := p.translator.GetApplyCon(top, userinput[0])
+			applyRules = strings.Split(llTable, "")
+
+			if ruleNum == 0 {
+				fmt.Print("syntax error")
+			} else {
+				ruleNums = append(ruleNums, ruleNum)
+				p.Apply(applyRules)
+			}
+
 		}
 
 	}
@@ -67,18 +91,16 @@ func (p *Parser) LLParser() {
 
 //procedure APPLY(p: A -> X1...Xm)
 
-func (p *Parser) Apply() {
+func (p *Parser) Apply(productionOfA []string) {
 	//call POP()
 	n := len(symbals) - 1
-	a := symbals[n] //top element
-	startSymbal = startSymbal[:n]
+	symbals = symbals[:n]
 	//end pop
 
 	//for i = m downto 1 do
 	//	call PUSH(Xi)
 
-	productionOfA := p.trans.GetApplyCon(a)
 	for i := len(productionOfA) - 1; i >= 0; i-- {
-		startSymbal = append(startSymbal, productionOfA[i])
+		symbals = append(symbals, productionOfA[i])
 	}
 }
