@@ -31,7 +31,3 @@ func (t *Translator) IsTerminal(token string) bool {
 func (t *Translator) GetApplyCon(leftToken string, rightToken string) (uint16, string) {
 	return 0, ""
 }
-
-func (t *Translator) GetStartSymbal() string {
-	return ""
-}
