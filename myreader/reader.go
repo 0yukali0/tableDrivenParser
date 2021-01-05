@@ -1,39 +1,42 @@
-package reader
+package myreader
 
 import (
 	"bufio"
 	"errors"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 )
 
-type rule struct {
-	num     uint
-	context string
+type Rule struct {
+	Num     uint
+	Context string
+	Empty   bool
 }
 
-type info struct {
-	num   uint
-	token string
+type Info struct {
+	Num   uint
+	Token string
 }
 
 type Reader struct {
-	context      string
+	Context      string
 	Terminals    []string
 	Nonterminals []string
-	RulesOwners  []info
+	RulesOwners  []Info
 	RulesOwner   string
-	Rules        map[string][]rule
+	Rules        map[string][]Rule
 }
 
 func NewReader() *Reader {
 	fileReader := &Reader{
-		context:      "",
+		Context:      "",
 		Terminals:    make([]string, 1),
 		Nonterminals: make([]string, 1),
+		RulesOwners:  make([]Info, 1),
 		RulesOwner:   "",
-		Rules:        make(map[string][]rule),
+		Rules:        make(map[string][]Rule),
 	}
 	return fileReader
 }
@@ -50,13 +53,13 @@ func (r *Reader) ReadFile(filepath string) error {
 	if err != nil {
 		return errors.New("Read to file fail")
 	}
-	r.context = string(fd)
+	r.Context = string(fd)
 	r.initRules()
 	return nil
 }
 
 func (r *Reader) initRules() {
-	lines := strings.Split(r.context, "\n")
+	lines := strings.Split(r.Context, "\n")
 	result := ""
 	//delete number and reorder context
 	for index, line := range lines {
@@ -74,8 +77,8 @@ func (r *Reader) initRules() {
 			result += line
 		}
 	}
-	r.context = result
-	lines = strings.Split(r.context, ">")
+	r.Context = result
+	lines = strings.Split(r.Context, ">")
 	//init with owner > rule | rule |....> owner > ..
 	for index := 0; len(lines) != 0; index++ {
 		r.setRulesOwner(lines[0])
@@ -102,9 +105,9 @@ func (r *Reader) setRulesOwner(owner string) {
 func (r Reader) addRulesOwner(index uint, owner string) {
 	if !Contains(r.Nonterminals, owner) {
 		r.Nonterminals = append(r.Nonterminals, owner)
-		ownerInfo := info{
-			num:   uint(index),
-			token: r.RulesOwner,
+		ownerInfo := Info{
+			Num:   uint(index),
+			Token: r.RulesOwner,
 		}
 		r.Nonterminals = append(r.Nonterminals, owner)
 		r.RulesOwners = append(r.RulesOwners, ownerInfo)
@@ -112,13 +115,13 @@ func (r Reader) addRulesOwner(index uint, owner string) {
 }
 
 func (r *Reader) setRules(rulesLine string) {
-	var rulesInfo []rule = make([]rule, 1)
+	var rulesInfo []Rule = make([]Rule, 1)
 	rulesLine = strings.Trim(rulesLine, " \r\t\n")
 	rules := strings.Split(rulesLine, " ")
 
 	for _, oneRule := range rules {
-		ruleInfo := rule{
-			context: strings.Trim(oneRule, " \r\t\n"),
+		ruleInfo := Rule{
+			Context: strings.Trim(oneRule, " \r\t\n"),
 		}
 		rulesInfo = append(rulesInfo, ruleInfo)
 	}
@@ -128,6 +131,53 @@ func (r *Reader) setRules(rulesLine string) {
 	} else {
 		r.Rules[r.RulesOwner] = append(r.Rules[r.RulesOwner], rulesInfo...)
 	}
+}
+
+func (r *Reader) Recount() {
+	index := 1
+	for _, nonterminal := range r.Nonterminals {
+		rules := r.Rules[nonterminal]
+		for subIndex, subRule := range rules {
+			subRule.Num = uint(index)
+			rules[subIndex] = subRule
+			index++
+		}
+	}
+}
+
+func (r *Reader) initTreminals() {
+	nonterminals := r.Nonterminals
+	for _, keyRules := range r.Rules {
+		for _, keyRule := range keyRules {
+			tokens := strings.Split(keyRule.Context, " ")
+			for _, token := range tokens {
+				if !Contains(nonterminals, token) && !Contains(r.Terminals, token) {
+					r.Terminals = append(r.Terminals, token)
+				}
+			}
+		}
+	}
+	terminals := r.Terminals
+	sort.SliceStable(terminals, func(i, j int) bool {
+		if terminals[i] == "$" {
+			return false
+		}
+
+		if terminals[j] == "$" {
+			return true
+		}
+
+		result := strings.Compare(terminals[i], terminals[j]) * -1
+		switch result {
+		case 1:
+			return true
+		case -1:
+			return false
+		default:
+			return true
+		}
+	})
+	r.Terminals = terminals
 }
 
 func Contains(set []string, input string) bool {

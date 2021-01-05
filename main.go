@@ -1,17 +1,28 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	r "myreader"
 )
 
-var filePath = flag.String("FILEPATH", "", "Input your CFG path")
+var (
+	reader *r.Reader
+	trans  *t.translator
+	way    string
+)
 
 func main() {
-	flag.Parse()
-	for i := 0; i != flag.NArg(); i++ {
-		fmt.Printf("arg[%d]=%s\n", i, flag.Arg(i))
+	for way != "exit" {
+		fmt.Println("input,file,exit")
+		fmt.Scanln(&way)
+		if way == "file" {
+			var filePath string
+			fmt.Scanln(&filePath)
+			reader.ReadFile(filePath)
+		}
 	}
+}
 
-	fmt.Println("Path=", *filePath)
+func reset() {
+	reader = r.NewReader()
 }
