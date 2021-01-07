@@ -12,14 +12,24 @@ var (
 )
 
 func main() {
+	way = ""
 	for way != "exit" {
-		fmt.Println("input,file,exit")
-		fmt.Scanln(&way)
-		if way == "file" {
-			var filePath string
-			fmt.Scanln(&filePath)
-			reader.ReadFile(filePath)
-		}
+		input()
+	}
+}
+
+func input() {
+	fmt.Println("input,file,exit")
+	fmt.Scanln(&way)
+	switch {
+	case way == "file":
+		var filePath string
+		fmt.Scanln(&filePath)
+		reset()
+		reader.ReadFile(filePath)
+	case way == "input":
+		reset()
+		reader.ReadRule()
 	}
 }
 
